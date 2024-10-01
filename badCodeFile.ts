@@ -48,7 +48,6 @@ export class UserService {
   }
 }
 
-// Usage example
 const userService = new UserService();
 
 userService.addUser({ id: 1, username: "john_doe", password: "password123", email: "john@example.com" });
@@ -60,3 +59,9 @@ userService.deleteUser(1);
 
 const isAuthenticated = userService.authenticateUser("admin", ADMIN_PASSWORD);
 console.log("Is authenticated:", isAuthenticated);
+
+
+
+////asdsadasd
+//////////////
+////////////
