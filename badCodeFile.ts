@@ -66,3 +66,4 @@ console.log("Is authenticated:", isAuthenticated);
 //////////////
 ////////////
 //this is bad code
+//bunch of hardcoding here
