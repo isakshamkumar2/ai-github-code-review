@@ -56,14 +56,25 @@ async function main() {
       throw new Error('No pull request number found');
     }
 
+    console.log(`Analyzing PR #${pull_number} in ${owner}/${repo}`);
+
     const diff = await getPRDiff(owner, repo, pull_number);
+    console.log('Diff retrieved successfully');
+
     const analysis = await analyzeCode(diff);
+    console.log('Code analysis completed');
+
     await postComment(owner, repo, pull_number, analysis);
+    console.log('Comment posted successfully');
 
     core.setOutput('analysis', analysis);
   } catch (error) {
+    console.error('Error in main function:', error);
     core.setFailed((error as Error).message);
   }
 }
 
-main().catch(error => core.setFailed(error.message));
+main().catch(error => {
+  console.error('Unhandled error:', error);
+  core.setFailed(error.message);
+});
