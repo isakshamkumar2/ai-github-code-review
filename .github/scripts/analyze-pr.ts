@@ -14,29 +14,55 @@ async function getPRDiff(owner: string, repo: string, pull_number: number): Prom
   });
   return data as unknown as string;
 }
-
 async function analyzeCode(diff: string): Promise<string> {
   const prompt = `
-    Analyze the following code diff and provide a concise code review:
-    ${diff}
+As a senior software engineer at a leading tech company, perform a comprehensive code review on the following diff. Provide a detailed, professional analysis focusing on:
 
-    Focus on:
-    1. Potential bugs or errors
-    2. Code style and best practices
-    3. Performance issues
-    4. Security concerns
+1. Code Quality:
+   - Adherence to best practices and design patterns
+   - Code readability and maintainability
+   - Proper error handling and logging
 
-    Format your response as a markdown list.
-  `;
+2. Performance:
+   - Algorithmic efficiency
+   - Potential bottlenecks or resource-intensive operations
+
+3. Security:
+   - Potential vulnerabilities or security risks
+   - Proper handling of sensitive data
+
+4. Testing:
+   - Coverage of edge cases
+   - Suggestions for additional unit or integration tests
+
+5. Documentation:
+   - Clarity and completeness of comments and documentation
+   - Adherence to documentation standards
+
+6. Architecture:
+   - Scalability and extensibility of the design
+   - Proper separation of concerns
+
+Provide specific examples from the code and suggest improvements where applicable. Format your response using proper GitHub Markdown syntax, including code blocks for code examples.
+
+Here's the diff to review:
+
+\`\`\`
+${diff}
+\`\`\`
+
+Begin your review with a brief summary of the changes, followed by your detailed analysis. Conclude with a list of actionable recommendations.
+`;
 
   const response = await groq.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
     model: "llama3-8b-8192",
+    temperature: 0.2,
+    max_tokens: 1800,
   });
 
   return response.choices[0].message?.content || "No analysis available.";
 }
-
 async function postComment(owner: string, repo: string, issue_number: number, body: string): Promise<void> {
   await octokit.issues.createComment({
     owner,
@@ -56,14 +82,25 @@ async function main() {
       throw new Error('No pull request number found');
     }
 
+    console.log(`Analyzing PR #${pull_number} in ${owner}/${repo}`);
+
     const diff = await getPRDiff(owner, repo, pull_number);
+    console.log('Diff retrieved successfully');
+
     const analysis = await analyzeCode(diff);
+    console.log('Code analysis completed');
+
     await postComment(owner, repo, pull_number, analysis);
+    console.log('Comment posted successfully');
 
     core.setOutput('analysis', analysis);
   } catch (error) {
+    console.error('Error in main function:', error);
     core.setFailed((error as Error).message);
   }
 }
 
-main().catch(error => core.setFailed(error.message));
+main().catch(error => {
+  console.error('Unhandled error:', error);
+  core.setFailed(error.message);
+});
