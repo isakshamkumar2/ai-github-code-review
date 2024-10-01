@@ -65,3 +65,4 @@ console.log("Is authenticated:", isAuthenticated);
 ////asdsadasd
 //////////////
 ////////////
+//this is bad code
