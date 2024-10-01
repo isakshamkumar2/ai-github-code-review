@@ -16,34 +16,17 @@ async function getPRDiff(owner: string, repo: string, pull_number: number): Prom
 }
 async function analyzeCode(diff: string): Promise<string> {
   const prompt = `
-As a senior software engineer at a leading tech company, perform a comprehensive code review on the following diff. Provide a detailed, professional analysis focusing on:
+As a senior code reviewer, provide a concise, professional analysis of the following code diff. Focus on critical issues and include specific code examples. Your review should:
 
-1. Code Quality:
-   - Adherence to best practices and design patterns
-   - Code readability and maintainability
-   - Proper error handling and logging
+1. Identify the 3-5 most significant issues, covering areas such as security, performance, and code quality.
+2. For each issue, provide:
+   - A brief explanation of the problem
+   - A code snippet demonstrating the issue (in a GitHub-flavored markdown code block)
+   - A concise suggestion for improvement
 
-2. Performance:
-   - Algorithmic efficiency
-   - Potential bottlenecks or resource-intensive operations
+3. Conclude with a short, bullet-point list of key recommendations.
 
-3. Security:
-   - Potential vulnerabilities or security risks
-   - Proper handling of sensitive data
-
-4. Testing:
-   - Coverage of edge cases
-   - Suggestions for additional unit or integration tests
-
-5. Documentation:
-   - Clarity and completeness of comments and documentation
-   - Adherence to documentation standards
-
-6. Architecture:
-   - Scalability and extensibility of the design
-   - Proper separation of concerns
-
-Provide specific examples from the code and suggest improvements where applicable. Format your response using proper GitHub Markdown syntax, including code blocks for code examples.
+Format your response using proper GitHub Markdown syntax, including code blocks for code examples.
 
 Here's the diff to review:
 
@@ -51,14 +34,14 @@ Here's the diff to review:
 ${diff}
 \`\`\`
 
-Begin your review with a brief summary of the changes, followed by your detailed analysis. Conclude with a list of actionable recommendations.
+Limit your response to around 500 -1000 words, focusing on the most impactful feedback.
 `;
 
   const response = await groq.chat.completions.create({
     messages: [{ role: "user", content: prompt }],
     model: "llama3-8b-8192",
-    temperature: 0.2,
-    max_tokens: 1800,
+    temperature: 0.1,
+    max_tokens: 1000,
   });
 
   return response.choices[0].message?.content || "No analysis available.";
