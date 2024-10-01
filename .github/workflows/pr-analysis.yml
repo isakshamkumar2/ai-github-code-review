@@ -1,0 +1,24 @@
+name: PR Code Analysis
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'  # or '18' if you prefer
+    - name: Install dependencies
+      run: npm ci
+    - name: Compile TypeScript
+      run: npx tsc
+    - name: Analyze PR
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      run: node --experimental-modules dist/analyze-pr.js
